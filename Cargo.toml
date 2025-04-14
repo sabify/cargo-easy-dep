@@ -1,0 +1,21 @@
+[package]
+name = "cargo-easy-dep"
+description = "Simplifies dependency management in Rust workspaces by unifying common workspace members' dependencies in workspace"
+version = "0.1.0"
+authors = ["Saber Haj Rabiee"]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sabify/cargo-easy-dep"
+keywords = ["dependency", "cargo", "workspace", "members", "common"]
+readme = "README.md"
+
+[dependencies]
+cargo_metadata = "0.19.2"
+toml_edit = "0.22.24"
+clap = { version = "4.5.36", features = ["derive", "color", "env"] }
+clap-cargo = { version = "0.15.2", default-features = false }
+colored = "3.0"
+
+[profile.release]
+lto = true
+codegen-units = 1
