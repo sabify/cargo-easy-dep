@@ -1,7 +1,7 @@
 # cargo-easy-dep
 
 [![Crates.io](https://img.shields.io/crates/v/cargo-easy-dep.svg)](https://crates.io/crates/cargo-easy-dep)
-[![MIT/Apache-2.0 licensed](https://img.shields.io/crates/l/cargo-easy-dep.svg)](#license)
+[![License: MIT OR Apache-2.0](https://img.shields.io/crates/l/cargo-easy-dep.svg)](#license)
 [![Rust: 2024 Edition](https://img.shields.io/badge/Rust-2024_Edition-orange.svg)](#rust-version)
 
 A cargo subcommand that simplifies dependency management in Rust workspaces by automatically unifying common dependencies at the workspace level.
