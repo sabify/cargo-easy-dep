@@ -1,7 +1,7 @@
 [package]
 name = "cargo-easy-dep"
 description = "Simplifies dependency management in Rust workspaces by unifying common workspace members' dependencies in workspace"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Saber Haj Rabiee"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
