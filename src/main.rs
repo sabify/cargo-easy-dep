@@ -279,10 +279,61 @@ fn update_root_cargo_toml(
             })?;
 
         // Simple version string
-        deps_table.entry(name).or_insert_with(|| {
+        let mut dep = deps_table.entry(name).or_insert_with(|| {
             modified = true;
-            toml_edit::value(info.req.to_string())
+            let mut dep_table = toml_edit::Table::new();
+            dep_table.set_implicit(true);
+            dep_table["default-features"] = toml_edit::value(false);
+            dep_table["version"] = toml_edit::value(info.req.to_string());
+            dep_table.into_inline_table().into()
         });
+
+        match &mut dep {
+            toml_edit::Item::Value(toml_edit::Value::String(_)) => {
+                // Replace with default-features = false
+                let mut dep_table = toml_edit::Table::new();
+                dep_table.set_implicit(true);
+                dep_table["default-features"] = toml_edit::value(false);
+                dep_table["version"] = toml_edit::value(info.req.to_string());
+                *dep = dep_table.into_inline_table().into();
+                modified = true;
+            }
+            toml_edit::Item::Value(toml_edit::Value::InlineTable(table)) => {
+                // Add default-features = false
+                let entry = table.entry("default-features").or_insert_with(|| {
+                    modified = true;
+                    toml_edit::Value::Boolean(toml_edit::Formatted::new(false))
+                });
+
+                if let Some(is_default_features) = entry.as_bool() {
+                    if !is_default_features {
+                        *entry = toml_edit::Value::Boolean(toml_edit::Formatted::new(false));
+                        modified = true;
+                    }
+                }
+            }
+            toml_edit::Item::Table(table) => {
+                // Add default-features = false
+                let entry = table.entry("default-features").or_insert_with(|| {
+                    modified = true;
+                    toml_edit::value(true)
+                });
+
+                if let Some(is_default_features) = entry.as_bool() {
+                    if !is_default_features {
+                        *entry = toml_edit::value(false);
+                        modified = true;
+                    }
+                }
+            }
+
+            toml_edit::Item::ArrayOfTables(tables) => {
+                for table in tables.iter_mut() {
+                    modified |= update_dependencies_table(table, common_deps)?;
+                }
+            }
+            _ => {}
+        }
     }
 
     fs::write(&root_manifest_path, doc.to_string()).map_err(|e| io_err(e, &root_manifest_path))?;
@@ -378,6 +429,7 @@ fn update_dependencies_table(
                     let mut dep_table = toml_edit::Table::new();
                     dep_table.set_implicit(true);
                     dep_table["workspace"] = toml_edit::value(true);
+                    dep_table["default-features"] = toml_edit::value(true);
                     deps_table[name] = dep_table.into_inline_table().into();
                     modified = true;
                 }
@@ -399,6 +451,12 @@ fn update_dependencies_table(
                             modified = true;
                         }
                     }
+
+                    // Add implicitly define default-features
+                    table.entry("default-features").or_insert_with(|| {
+                        modified = true;
+                        toml_edit::Value::Boolean(toml_edit::Formatted::new(true))
+                    });
                 }
                 toml_edit::Item::Table(table) => {
                     // Keep existing configuration but add workspace = true
@@ -418,6 +476,12 @@ fn update_dependencies_table(
                             modified = true;
                         }
                     }
+
+                    // Add default-features = info.uses_default_features
+                    table.entry("default-features").or_insert_with(|| {
+                        modified = true;
+                        toml_edit::value(true)
+                    });
                 }
 
                 toml_edit::Item::ArrayOfTables(tables) => {

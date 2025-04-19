@@ -87,15 +87,19 @@ cargo easy-dep --quiet
 4. Updates the root `Cargo.toml` to add these dependencies to the `[workspace.dependencies]` section
 5. Updates each member's `Cargo.toml` to use `workspace = true` for these dependencies
 
+## Notes
+
+1. [The workspace default-features is problematic](https://github.com/rust-lang/cargo/issues/12162), so `cargo-easy-dep` will disable default-features for all dependencies in the workspace and enable them based on each member's preferences. This disabling has been done without diffing and it gives maintainers better visibility by explicitly indicating the features without falling into the mentioned issue.
+2. Only the first dependency version seen will be used in the workspace dependencies; tune the version based on your requirements in the workspace `Cargo.toml`.
+3. There is no difference between '^1.0' and '1.0' in versioning and as `cargo-easy-dep` uses `semver::VersionReq` as versioning strategy like what [`cargo`](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#caret-requirements) does, you will see '^1.0' in your root workspace `Cargo.toml` for dependencies versions. (`1.0` version used as an example)
+
 ## License
 
-Licensed under either of
+Licensed under either of:
 
 - Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
 - MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
-
-## Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
